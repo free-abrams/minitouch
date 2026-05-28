@@ -1,0 +1,47 @@
+name: Build minitouch
+
+# 触发条件：当推送到 main 分支，或者手动触发（workflow_dispatch）
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. 检出代码（由于 minitouch 包含子模块，需要开启 submodules）
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+      with:
+        repository: 'free-abrams/minitouch' # 直接拉取官方仓库，也可以换成你自己的 fork 地址
+        submodules: 'recursive'
+
+    # 2. 设置 Android NDK 环境
+    # minitouch 项目较老，建议使用 r21e 或 r23c 等较稳定的 NDK 版本
+    - name: Setup Android NDK
+      uses: android-actions/setup-android@v3
+      with:
+        ndk-version: '21.4.7075529' # 对应 NDK r21e
+
+    # 3. 使用 ndk-build 进行编译
+    - name: Build with ndk-build
+      run: |
+        ndk-build
+
+    # 4. 检查编译出的产物（可选，方便在日志中查看是否成功）
+    - name: Check Build Artifacts
+      run: |
+        echo "=== Generated Binaries ==="
+        ls -R libs/
+
+    # 5. 将编译好的二进制文件打包并上传到 GitHub Actions Artifacts
+    # 编译成功后，你可以在 GitHub Action 的 Run 页面下载这个压缩包
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: minitouch-binaries
+        path: libs/
