@@ -30,7 +30,7 @@ jobs:
     # 3. 使用 ndk-build 进行编译
     - name: Build with ndk-build
       run: |
-        ndk-build
+        $ANDROID_NDK_HOME/ndk-build
 
     # 4. 检查编译出的产物（可选，方便在日志中查看是否成功）
     - name: Check Build Artifacts
